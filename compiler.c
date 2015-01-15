@@ -11,6 +11,12 @@ int main(int argc, char **argv)
   char *inputFileName = argv[1];
   FILE *inputFile = fopen(inputFileName, "r");
 
+  if(!inputFile)
+    {
+      printf("Could not open file\n");
+      return -1;
+    }
+
   int extIndex = 0;
   for(extIndex = 0; inputFileName[extIndex] != '\0'; ++extIndex)
     {
@@ -20,7 +26,7 @@ int main(int argc, char **argv)
 	}
     }
 
-  char *outputFileName = (char *)malloc(sizeof(char) * (extIndex+2));
+  char *outputFileName = (char *)malloc(sizeof(char) * (extIndex+3));
 
   for(int i = 0; i < extIndex; ++i)
     {
@@ -29,6 +35,7 @@ int main(int argc, char **argv)
 
   outputFileName[extIndex] = '.';
   outputFileName[extIndex+1] = 'c';
+  outputFileName[extIndex+2] = '\0';
 
   FILE *outputFile = fopen(outputFileName,"w");
 
