@@ -18,35 +18,34 @@ char *open_file(char *fileName, int *codeLength)
   return fileBuffer;
 }
 
-void execute_instruction(char *codeBuffer, char *array, int *pointer,int *instructionPointer,char instruction)
+//Returns false if instruction leads to fatal error
+void execute_instruction(char *array, char **pointer,char **instructionPointer)
 {
-  *instructionPointer += 1;
-  
-  switch(instruction)
+  switch(**instructionPointer)
     {
-    case '<': *pointer -= 1; break;
-    case '>': *pointer += 1; break;
-    case '+': *(array + *pointer) += 1; break;
-    case '-': *(array + *pointer) -= 1; break;
-    case '.': putchar(*(array+*pointer)); break;
-    case ',': scanf("%c",(array + *pointer)); break;
+    case '<': --*pointer; break;
+    case '>': ++*pointer; break;
+    case '+': ++**pointer; break;
+    case '-': --**pointer; break;
+    case '.': putchar(**pointer); break;
+    case ',': **pointer = getchar(); break;
     case '[':
       {
-	if(*(array + *pointer) == 0)
+	if(!**pointer)
 	  {
-	    int current = *instructionPointer;
+	    char *current = *instructionPointer;
 	    int stackHeight = 0;
 	    while(1)
 	      {
-		if(*(codeBuffer + current) == '[')
+		if(*current == '[')
 		  {
 		    ++stackHeight;
 		  }
-		if(*(codeBuffer + current) == ']')
+		if(*current == ']')
 		  {
-		    if(stackHeight == 0)
+		    if(stackHeight == 1)
 		      {
-			*instructionPointer = current + 1;
+			*instructionPointer = current;
 			break;
 		      }
 		    else
@@ -61,21 +60,21 @@ void execute_instruction(char *codeBuffer, char *array, int *pointer,int *instru
       }break;
     case ']': 
       {
-	if(*(array + *pointer) != 0)
+	if(**pointer)
 	  {
-	    int current = *instructionPointer - 2;
+	    char *current = *instructionPointer;
 	    int stackHeight = 0;
 	    while(1)
 	      {
-		if(*(codeBuffer + current) == ']')
+		if(*current == ']')
 		  {
 		    ++stackHeight;
 		  }
-		if(*(codeBuffer + current) == '[')
+		if(*current == '[')
 		  {
-		    if(stackHeight == 0)
+		    if(stackHeight == 1)
 		      {
-			*instructionPointer = current + 1;
+			*instructionPointer = current;
 			break;
 		      }
 		    else
@@ -89,6 +88,8 @@ void execute_instruction(char *codeBuffer, char *array, int *pointer,int *instru
 	  }
       }break;
     }
+
+    *instructionPointer += 1;
 }
 
 int main(int argc, char **argv)
@@ -120,13 +121,12 @@ int main(int argc, char **argv)
     }
 
   //The location of the byte pointer
-  int ptr = 0;
+  char *ptr = array;
 
-  int instructionIndex = 0;
-  while(instructionIndex < codeLength)
+  char *instructionPtr = codeBuffer;
+  while(instructionPtr < codeBuffer + codeLength)
     {
-      char instruction = *(codeBuffer + instructionIndex);
-      execute_instruction(codeBuffer, array,&ptr,&instructionIndex,instruction);
+      execute_instruction(array,&ptr,&instructionPtr);
     }
 
   return 0;
