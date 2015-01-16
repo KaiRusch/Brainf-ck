@@ -9,4 +9,4 @@ Brainf*ck Interpreter
 
 `>compiler <source file>`
 
-The compiler outputs a c file
+The compiler outputs a C source file
